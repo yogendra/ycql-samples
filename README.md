@@ -16,8 +16,7 @@ cd sample
 **Data Generator**
 
 ```bash
-java -cp "target/ycql-hello-world-1.0.jar:target/lib/*" com.yugabyte.sample.apps.
-DataGenerator
+java -cp "target/ycql-hello-world-1.0.jar:target/lib/*" com.yugabyte.sample.apps.DataGenerator
 
 ```
 
@@ -25,8 +24,7 @@ DataGenerator
 **Query Runner**
 
 ```bash
-java -cp "target/ycql-hello-world-1.0.jar:target/lib/*" com.yugabyte.sample.apps.
-Sample
+java -cp "target/ycql-hello-world-1.0.jar:target/lib/*" com.yugabyte.sample.apps.Sample
 
 ```
 
