@@ -80,12 +80,12 @@ Update [DataGenerator.java] to change the number off Records created
 
 ```java
 class DataGenerator{
-  // ...
+  //...
   private static final int VENDOR_COUNT = 25;
   private static final int DOMAIN_COUNT = 25;
   private static final int TECH_COUNT = 5;
   private static final int RECORD_PER_COMBO = 100;
-  /...
+  //...
 }
 ```
 
