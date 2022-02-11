@@ -1,6 +1,5 @@
 package com.yugabyte.sample.apps;
 
-import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -8,10 +7,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
-import com.datastax.driver.core.TypeCodec;
-
 import com.datastax.driver.extras.codecs.jdk8.LocalDateCodec;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +21,7 @@ public class CassandraNativeAsync {
   private static final String query = "select count(*) from test.sensor_data where "
     + "vendor = ? and domain = ? and creation_date = ?;";
 
-  private Cluster cluster;
+  private final Cluster cluster;
   public CassandraNativeAsync(Cluster cluster) {
     this.cluster = cluster;
   }

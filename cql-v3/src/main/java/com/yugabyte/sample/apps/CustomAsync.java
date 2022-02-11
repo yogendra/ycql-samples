@@ -24,8 +24,8 @@ public class CustomAsync {
   private static final String query = "select count(*) from test.sensor_data where "
     + "vendor = ? and domain = ? and creation_date = ?;";
 
-  private ExecutorService executor;
-  private Cluster cluster;
+  private final ExecutorService executor;
+  private final Cluster cluster;
 
   public CustomAsync(Cluster cluster) {
     this.executor = newFixedThreadPool(THREADPOOL_SIZE);

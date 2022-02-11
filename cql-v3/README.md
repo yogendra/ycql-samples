@@ -2,6 +2,7 @@
 
 Collection of sample apps for YCQL
 
+1. [Async Execution and Aggregation](#sample-App--async-execution-and-ggregation)
 
 ## Build
 
@@ -10,7 +11,6 @@ Collection of sample apps for YCQL
 git clone <repo> samples
 cd samples/cql-v3
 ./mvnw clean install
-
 ```
 
 
@@ -75,15 +75,18 @@ java -cp "target/cql-v3-1.0.jar:target/lib/*" com.yugabyte.sample.apps.CustomAsy
 
 **Change Query params**
 
-Update [src/main/java/com/yugabyte/customAsync/apps/DataGenerator.java]
-(src/main/java/com/yugabyte/sample/apps/DataGenerator.java) to change the number off Records created
+Update [DataGenerator.java] to change the number off Records created
 
 
 ```java
-private static final int VENDOR_COUNT = 25;
-private static final int DOMAIN_COUNT = 25;
-private static final int TECH_COUNT = 5;
-private static final int RECORD_PER_COMBO = 100;
+class DataGenerator{
+  // ...
+  private static final int VENDOR_COUNT = 25;
+  private static final int DOMAIN_COUNT = 25;
+  private static final int TECH_COUNT = 5;
+  private static final int RECORD_PER_COMBO = 100;
+  /...
+}
 ```
 
 Update above constants to change record counts
@@ -105,6 +108,7 @@ private static final int QUERY_DOMAIN_END = 15;
 Update above constants to change the query params
 
 
+[DataGenerator.java]: src/main/java/com/yugabyte/sample/apps/DataGenerator.java
 [CassandraNativeAsync.java]: src/main/java/com/yugabyte/sample/apps/CassandraNativeAsync.java
 [CustomAsync.java]: src/main/java/com/yugabyte/sample/apps/CustomAsync.java
 [CustomAsyncLegacy.java]: src/main/java/com/yugabyte/sample/apps/CustomAsyncLegacy.java

@@ -5,15 +5,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.extras.codecs.jdk8.LocalDateCodec;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.List;
-import java.util.Properties;
-import java.util.stream.IntStream;
 import org.slf4j.Logger;
 
 public class DataGenerator {
