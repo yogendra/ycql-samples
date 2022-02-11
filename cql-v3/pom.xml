@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.yugabyte.sample.apps</groupId>
-  <artifactId>ycql-hello-world</artifactId>
+  <artifactId>cql-v3</artifactId>
   <version>1.0</version>
   <packaging>jar</packaging>
   <properties>

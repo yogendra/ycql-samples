@@ -54,28 +54,22 @@ public class DataGenerator {
 
       System.out.println("Created table");
 
-      range(1, VENDOR_COUNT + 1)
-        .forEach(vendorIndex -> {
-          String vendor = String.format("VENDOR-%1$s", vendorIndex);
-          range(1, DOMAIN_COUNT + 1).forEach(domainIndex -> {
-            String domain = String.format("DOMAIN-%1$s", domainIndex);
-            range(1, TECH_COUNT + 1).forEach(techIndex -> {
-              String tech = String.format("TECH-%1$s", techIndex);
-              logger.info("Inserting Records for {} / {} / {} / {}", vendor, domain, tech,
-                RECORD_PER_COMBO);
-              range(1, RECORD_PER_COMBO + 1).forEach(recIndex -> {
-                // Insert a row.
-                String insert = "INSERT INTO test.sensor_data "
-                  + "(domain, vendor, creation_date, technology, unique_identifier)" +
-                  " VALUES (?,?,toDate(now()), ?,cast( uuid() as text));";
-                ResultSet insertResult = session.execute(insert, domain, vendor, tech);
-
-              });
-              logger.info("Inserted Records for {} / {} / {}/ {}", vendor, domain, tech, RECORD_PER_COMBO);
-            });
-          });
-        });
-
+      for ( var vendorIndex: range(1, VENDOR_COUNT+1).toArray()) {
+        String vendor = String.format("VENDOR-%1$s", vendorIndex);
+        for (var domainIndex : range(1, DOMAIN_COUNT + 1).toArray()) {
+          String domain = String.format("DOMAIN-%1$s", domainIndex);
+          for (var techIndex : range(1, TECH_COUNT + 1).toArray()) {
+            String tech = String.format("TECH-%1$s", techIndex);
+            for (var recordIndex : range(1, RECORD_PER_COMBO + 1).toArray()) {
+              String insert = "INSERT INTO test.sensor_data "
+                + "(domain, vendor, creation_date, technology, unique_identifier)" +
+                " VALUES (?,?,toDate(now()), ?,cast( uuid() as text));";
+              ResultSet insertResult = session.execute(insert, domain, vendor, tech);
+            }
+            logger.info("Inserted Records for {} / {} / {}/ {}", vendor, domain, tech, RECORD_PER_COMBO);
+          }
+        }
+      }
       // Close the client.
       session.close();
       cluster.close();

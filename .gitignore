@@ -1,4 +1,2 @@
 target/
-*cacert*
-*cer
-.idea/
+.DS_Store
