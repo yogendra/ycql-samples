@@ -28,17 +28,16 @@ three variants of the app.
 
 ```bash
 java -cp "target/cql-v3-1.0.jar:target/lib/*" com.yugabyte.sample.apps.DataGenerator
-
-### Query Data
-
 ```
+
+### Run Sample to Query Data
+
 **Option 1: Query via Cassandra Native Async**
 
 ```bash
 java -cp "target/cql-v3-1.0.jar:target/lib/*" com.yugabyte.sample.apps.CassandraNativeAsync
 
 ```
-
 
 **Option 2: Query via Custom Async**
 
