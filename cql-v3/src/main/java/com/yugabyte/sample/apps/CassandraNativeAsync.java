@@ -8,33 +8,33 @@ import static org.slf4j.LoggerFactory.getLogger;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
-import com.datastax.driver.core.Session;
+import com.datastax.driver.core.TypeCodec;
+
 import com.datastax.driver.extras.codecs.jdk8.LocalDateCodec;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import org.slf4j.Logger;
 
-public class CassandraNativeAsyc {
+public class CassandraNativeAsync {
 
-  private static final Logger logger = getLogger(CassandraNativeAsyc.class);
+  private static final Logger logger = getLogger(CassandraNativeAsync.class);
 
 
   private static final String query = "select count(*) from test.sensor_data where "
     + "vendor = ? and domain = ? and creation_date = ?;";
 
   private Cluster cluster;
-  public CassandraNativeAsyc(Cluster cluster) {
+  public CassandraNativeAsync(Cluster cluster) {
     this.cluster = cluster;
   }
 
 
 
   public long getCount(List<String> vendors, List<String> domains, LocalDate date) {
+
+    logger.info("Processing V:[{}], D:[{}], Dt:[{}] ", vendors, domains, date);
     var session = cluster.connect();
     var selectStatement = session.prepare(query);
 
@@ -60,7 +60,7 @@ public class CassandraNativeAsyc {
     }
     return count;
   }
-  
+
   public static void main(String[] args) {
     var QUERY_VENDOR_START = 1;
     var QUERY_VENDOR_END = 24;
@@ -78,7 +78,8 @@ public class CassandraNativeAsyc {
       .getCodecRegistry()
       .register(LocalDateCodec.instance);
 
-    CassandraNativeAsyc sample = new CassandraNativeAsyc(cluster);
+
+    CassandraNativeAsync sample = new CassandraNativeAsync(cluster);
 
     var vendors = range(QUERY_VENDOR_START, QUERY_VENDOR_END + 1).mapToObj(i -> String.format(
         "VENDOR-%1$s", i))

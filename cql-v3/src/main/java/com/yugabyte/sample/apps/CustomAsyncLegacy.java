@@ -1,7 +1,6 @@
 package com.yugabyte.sample.apps;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -16,14 +15,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import org.slf4j.Logger;
 
-public class SampleLegacy {
+public class CustomAsyncLegacy {
 
-  private static final Logger logger = getLogger(SampleLegacy.class);
+  private static final Logger logger = getLogger(CustomAsyncLegacy.class);
   private static final int THREADPOOL_SIZE = 20;
-  private static final int QUERY_VENDOR_START = 1;
-  private static final int QUERY_VENDOR_END = 24;
-  private static final int QUERY_DOMAIN_START = 1;
-  private static final int QUERY_DOMAIN_END = 15;
 
 
   private static final String query = "select count(*) from test.sensor_data where "
@@ -32,19 +27,14 @@ public class SampleLegacy {
   private ExecutorService executor;
   private Cluster cluster;
 
-  public SampleLegacy() {
+  public CustomAsyncLegacy(Cluster cluster) {
     this.executor = newFixedThreadPool(THREADPOOL_SIZE);
-    this.cluster = Cluster.builder()
-      .addContactPoint("")
-      .withCredentials("yugabyte", "")
-      .build();
-    this.cluster.getConfiguration()
-      .getCodecRegistry()
-      .register(LocalDateCodec.instance);
+    this.cluster = cluster;
   }
 
 
   public long getCount(List<String> vendors, List<String> domains, LocalDate date) {
+    logger.info("Processing V:[{}], D:[{}], Dt:[{}] ", vendors, domains, date);
     List<Future<Long>> jobs = new ArrayList<>(vendors.size() * domains.size());
     for (var vendor : vendors) {
       for (var domain : domains) {
@@ -97,14 +87,34 @@ public class SampleLegacy {
 
   public static void main(String[] args) {
 
-    var vendors = range(QUERY_VENDOR_START, QUERY_VENDOR_END + 1).mapToObj(i -> String.format(
-        "VENDOR-%1$s", i))
-      .collect(toList());
-    var domains = range(QUERY_DOMAIN_START, QUERY_DOMAIN_END + 1).mapToObj(i -> String.format(
-        "DOMAIN-%1$s", i))
-      .collect(toList());
+    var QUERY_VENDOR_START = 1;
+    var QUERY_VENDOR_END = 24;
+    var QUERY_DOMAIN_START = 1;
+    var QUERY_DOMAIN_END = 15;
+
+    var cluster = Cluster.builder()
+      .addContactPoint("")
+      .withCredentials("yugabyte", "")
+      .build();
+
+    cluster.getConfiguration()
+      .getCodecRegistry()
+      .register(LocalDateCodec.instance);
+
+    CustomAsyncLegacy sample = new CustomAsyncLegacy(cluster);
+
+
+    var vendors = new ArrayList<String>(QUERY_VENDOR_END);
+    var domains = new ArrayList<String>(QUERY_DOMAIN_END);
+
+    for(var i: range(QUERY_VENDOR_START, QUERY_VENDOR_END+1).toArray()){
+      vendors.add(String.format("VENDOR-%1$s", i));
+    }
+    for(var i: range(QUERY_DOMAIN_START, QUERY_DOMAIN_END+1).toArray()){
+      domains.add(String.format("DOMAIN-%1$s", i));
+    }
     var date = LocalDate.now();
-    SampleLegacy sample = new SampleLegacy();
+
     var count = sample.getCount(vendors, domains, date);
 
     logger.info("Vendors: {}", vendors.size());

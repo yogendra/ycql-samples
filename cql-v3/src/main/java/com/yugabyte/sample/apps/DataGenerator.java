@@ -7,6 +7,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.extras.codecs.jdk8.LocalDateCodec;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -31,6 +32,9 @@ public class DataGenerator {
         .addContactPoint("")
         .withCredentials("cassandra", "")
         .build();
+      cluster.getConfiguration()
+        .getCodecRegistry()
+        .register(LocalDateCodec.instance);
       Session session = cluster.connect();
 
       // Create keyspace 'ybdemo' if it does not exist.
