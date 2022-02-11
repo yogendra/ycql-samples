@@ -1,19 +1,21 @@
 package com.yugabyte.sample.apps;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.extras.codecs.jdk8.LocalDateCodec;
+
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
+import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -38,40 +40,33 @@ public class CassandraNativeAsyc {
   public long getCount(List<String> vendors, List<String> domains, LocalDate date) {
     try(CqlSession session = sessionBuilder.build()) {
       PreparedStatement selectStatement = session.prepare(query);
-      var count = new AtomicLong()
-      List<Future<Long>> jobs = new ArrayList<>(vendors.size() * domains.size());
+      var count = new AtomicLong();
+
       for (var vendor : vendors) {
         for (var domain : domains) {
           session.executeAsync(selectStatement.bind(vendor, domain, date))
-            .handle((ars, ex) -> {
-              count.addAndGet(ars.one()
-                .get(0, Long:class))
+            .whenComplete((ars, ex) -> {
+              long l = ars.one().get(0, Long.class);
+              count.addAndGet(l);
             });
-
-
         }
       }
+      System.out.println(
+        String.format(
+          "LimitConcurrencyRequestThrottler finished executing %s queries with a concurrency level of %s.",
+          vendors.size() * domains.size(),
+          session
+            .getContext()
+            .getConfig()
+            .getDefaultProfile()
+            .getInt(DefaultDriverOption.REQUEST_THROTTLER_MAX_CONCURRENT_REQUESTS)));
       return count.get();
+    }catch(Exception ex){
+      logger.error("Execution failed");
+      throw new RuntimeException(ex);
     }
-    List<Future<Long>> jobs = new ArrayList<>(vendors.size() * domains.size());
-    for (var vendor : vendors) {
-      for (var domain : domains) {
-        var job = new QueryExecutionJob(vendor, domain, date, sessionBuilder);
-
-        jobs.add(future);
-      }
-    }
-    long count = 0;
-    for(Future<Long> job: jobs){
-      try {
-        count += job.get();
-      } catch (Exception e) {
-        logger.error("Failed to get count", e);
-        throw new RuntimeException(e);
-      }
-    }
-    return count;
   }
+
   public static void main(String[] args) {
     var QUERY_VENDOR_START = 1;
     var QUERY_VENDOR_END = 24;
@@ -85,7 +80,7 @@ public class CassandraNativeAsyc {
         "DOMAIN-%1$s", i))
       .collect(toList());
     var date = LocalDate.now();
-    CassandraNativeAsyc sample = new CassandraNativeAsyc();
+    CassandraNativeAsyc sample = new CassandraNativeAsyc(CqlSession.builder());
     var count = sample.getCount(vendors, domains, date);
 
     logger.info("Vendors: {}", vendors.size());
