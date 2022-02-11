@@ -60,7 +60,7 @@ public class CassandraNativeAsyc {
     }
     return count;
   }
-
+  
   public static void main(String[] args) {
     var QUERY_VENDOR_START = 1;
     var QUERY_VENDOR_END = 24;
