@@ -7,6 +7,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.extras.codecs.jdk8.LocalDateCodec;
+import java.time.LocalDate;
 import org.slf4j.Logger;
 
 public class DataGenerator {
@@ -50,7 +51,7 @@ public class DataGenerator {
       ResultSet createResult = session.execute(createTable);
 
       System.out.println("Created table");
-
+      var date = LocalDate.now();
       for ( var vendorIndex: range(1, VENDOR_COUNT+1).toArray()) {
         String vendor = String.format("VENDOR-%1$s", vendorIndex);
         for (var domainIndex : range(1, DOMAIN_COUNT + 1).toArray()) {
@@ -60,8 +61,8 @@ public class DataGenerator {
             for (var recordIndex : range(1, RECORD_PER_COMBO + 1).toArray()) {
               String insert = "INSERT INTO test.sensor_data "
                 + "(domain, vendor, creation_date, technology, unique_identifier)" +
-                " VALUES (?,?,toDate(now()), ?,cast( uuid() as text));";
-              ResultSet insertResult = session.execute(insert, domain, vendor, tech);
+                " VALUES (?,?,?, ?,cast( uuid() as text));";
+              ResultSet insertResult = session.execute(insert, domain, vendor, date, tech);
             }
             logger.info("Inserted Records for {} / {} / {}/ {}", vendor, domain, tech, RECORD_PER_COMBO);
           }
