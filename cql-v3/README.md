@@ -13,40 +13,40 @@ cd samples/cql-v3
 ./mvnw clean install
 ```
 
-
 ## Sample App: Async Execution and Aggregation
 
 This application shows how to execute queries asynchronously and aggregate results. There are
 three variants of the app.
+
 1. CassandraNativeAsync: Uses native cassandra async function.
 2. CustomAsync: Uses customer executor to execute queries and aggregate results
 3. CustomAsyncLegacy: Just a syntactical variant on #2, using legacy loops for readability
 
 ### Run
 
-**Data Generator**
+#### Data Generator
 
 ```bash
 java -cp "target/cql-v3-1.0.jar:target/lib/*" com.yugabyte.sample.apps.DataGenerator
 ```
 
-### Run Sample to Query Data
+#### Run Sample to Query Data
 
-**Option 1: Query via Cassandra Native Async**
+##### Option 1: Query via Cassandra Native Async
 
 ```bash
 java -cp "target/cql-v3-1.0.jar:target/lib/*" com.yugabyte.sample.apps.CassandraNativeAsync
 
 ```
 
-**Option 2: Query via Custom Async**
+##### Option 2: Query via Custom Async
 
 ```bash
 java -cp "target/cql-v3-1.0.jar:target/lib/*" com.yugabyte.sample.apps.CustomAsync
 
 ```
 
-**Option 3: Query via Custom Async with Legacy Loops**
+##### Option 3: Query via Custom Async with Legacy Loops
 
 ```bash
 java -cp "target/cql-v3-1.0.jar:target/lib/*" com.yugabyte.sample.apps.CustomAsyncLegacy
@@ -54,9 +54,9 @@ java -cp "target/cql-v3-1.0.jar:target/lib/*" com.yugabyte.sample.apps.CustomAsy
 ```
 
 
-**Expected Output**
+### Expected Output
 
-```
+```log
 42 [main] INFO com.datastax.driver.core - DataStax Java driver 3.10.3-yb-2 for Apache Cassandra
 53 [main] INFO com.datastax.driver.core.GuavaCompatibility - Detected Guava >= 19 in the classpath, using modern compatibility layer
 386 [main] INFO com.datastax.driver.core.ClockFactory - Using native clock to generate timestamps.
@@ -73,10 +73,9 @@ java -cp "target/cql-v3-1.0.jar:target/lib/*" com.yugabyte.sample.apps.CustomAsy
 
 ```
 
-**Change Query params**
+### Change Query params
 
 Update [DataGenerator.java] to change the number off Records created
-
 
 ```java
 class DataGenerator{
@@ -91,8 +90,6 @@ class DataGenerator{
 
 Update above constants to change record counts
 
-
-
 Open Java source for the query clas ([CassandraNativeAsync.java], [CustomAsyncLegacy.java],
 or [CustomAsync.java])
 to change the query
@@ -105,8 +102,33 @@ private static final int QUERY_DOMAIN_START = 1;
 private static final int QUERY_DOMAIN_END = 15;
 
 ```
-Update above constants to change the query params
 
+### Observations
+
+Output:
+
+Since we are running queries parallelly, it would be worth checking how many concurrent queries are running. So, I  captured the output from ' [YCQL Live Ops](http://127.0.0.1:12000/rpcz) using curl
+
+```bash
+while true; do  curl -sSL http://127.0.0.1:12000/rpcz | jq -c ; done
+```
+
+And this is what I saw
+
+```log
+30 [main] INFO com.datastax.driver.core - DataStax Java driver 3.10.3-yb-2 for Apache Cassandra
+42 [main] INFO com.datastax.driver.core.GuavaCompatibility - Detected Guava >= 19 in the classpath, using modern compatibility layer
+441 [main] INFO com.datastax.driver.core.ClockFactory - Using native clock to generate timestamps.
+592 [main] INFO com.yugabyte.sample.apps.CassandraNativeAsync - Processing:  vendor in ([VENDOR-1, VENDOR-2, VENDOR-3, VENDOR-4, VENDOR-5, VENDOR-6, VENDOR-7, VENDOR-8, VENDOR-9, VENDOR-10, VENDOR-11, VENDOR-12, VENDOR-13, VENDOR-14, VENDOR-15, VENDOR-16, VENDOR-17, VENDOR-18, VENDOR-19, VENDOR-20, VENDOR-21, VENDOR-22, VENDOR-23, VENDOR-24]) and domain in ([DOMAIN-1, DOMAIN-2, DOMAIN-3, DOMAIN-4, DOMAIN-5, DOMAIN-6, DOMAIN-7, DOMAIN-8, DOMAIN-9, DOMAIN-10, DOMAIN-11, DOMAIN-12, DOMAIN-13, DOMAIN-14, DOMAIN-15]) and creation_date = '2022-02-12'
+660 [main] INFO com.datastax.driver.core.NettyUtil - Did not find Netty's native epoll transport in the classpath, defaulting to NIO.
+1271 [main] INFO com.datastax.driver.core.policies.DCAwareRoundRobinPolicy - Using data-center name 'datacenter1' for DCAwareRoundRobinPolicy (if this is incorrect, please provide the correct datacenter name with DCAwareRoundRobinPolicy constructor)
+1273 [main] INFO com.datastax.driver.core.Cluster - New Cassandra host localhost/127.0.0.1:9042 added
+1562 [main] INFO com.yugabyte.sample.apps.CassandraNativeAsync - Finished executing 360 queries with a concurrency levels: Local: 1024 and Remote: 256
+1565 [main] INFO com.yugabyte.sample.apps.CassandraNativeAsync - Vendors: 24
+1565 [main] INFO com.yugabyte.sample.apps.CassandraNativeAsync - Domains: 15
+1566 [main] INFO com.yugabyte.sample.apps.CassandraNativeAsync - Date: 2022-02-12
+1566 [main] INFO com.yugabyte.sample.apps.CassandraNativeAsync - Count: 180000
+```
 
 [DataGenerator.java]: src/main/java/com/yugabyte/sample/apps/DataGenerator.java
 [CassandraNativeAsync.java]: src/main/java/com/yugabyte/sample/apps/CassandraNativeAsync.java
