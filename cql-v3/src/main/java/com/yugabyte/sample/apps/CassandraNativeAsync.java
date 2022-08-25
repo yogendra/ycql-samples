@@ -10,7 +10,6 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.extras.codecs.jdk8.LocalDateCodec;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -24,14 +23,16 @@ public class CassandraNativeAsync {
   private static final Logger logger = getLogger(CassandraNativeAsync.class);
 
 
-  private static final String query = "select count(*) from test.sensor_data where "
-    + "vendor = ? and domain = ? and creation_date = ?;";
+  private static final String query = """
+    select count(unique_identifier) from test.sensor_data
+    where vendor = ? and domain = ? and creation_date = ?;
+    """;
 
   private final Cluster cluster;
+
   public CassandraNativeAsync(Cluster cluster) {
     this.cluster = cluster;
   }
-
 
 
   public long getCount(List<String> vendors, List<String> domains, LocalDate date) {
@@ -50,19 +51,26 @@ public class CassandraNativeAsync {
     }
 
     var count = 0L;
-    for(ResultSetFuture futureResult : futureResultList){
-        ResultSet rs = futureResult.getUninterruptibly();
-        count += rs.one().get(0,Long.class);
+    for (ResultSetFuture futureResult : futureResultList) {
+      ResultSet rs = futureResult.getUninterruptibly();
+      count += rs.one()
+        .get(0, Long.class);
     }
 
-    var localConcurrency  =
-      session.getCluster().getConfiguration().getPoolingOptions().getMaxRequestsPerConnection(
-      HostDistance.LOCAL);
+    var localConcurrency =
+      session.getCluster()
+        .getConfiguration()
+        .getPoolingOptions()
+        .getMaxRequestsPerConnection(
+          HostDistance.LOCAL);
     var remoteConcurrency =
-      session.getCluster().getConfiguration().getPoolingOptions().getMaxRequestsPerConnection(HostDistance.REMOTE);
+      session.getCluster()
+        .getConfiguration()
+        .getPoolingOptions()
+        .getMaxRequestsPerConnection(HostDistance.REMOTE);
 
     logger.info("Finished executing {} queries with a concurrency levels: Local: {} and Remote: "
-      + "{}",futureResultList.size(), localConcurrency, remoteConcurrency);
+      + "{}", futureResultList.size(), localConcurrency, remoteConcurrency);
 
     return count;
   }
@@ -72,8 +80,6 @@ public class CassandraNativeAsync {
     var QUERY_VENDOR_END = 24;
     var QUERY_DOMAIN_START = 1;
     var QUERY_DOMAIN_END = 15;
-
-
 
     var cluster = Cluster.builder()
       .addContactPoint("")
