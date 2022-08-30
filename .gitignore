@@ -1,4 +1,4 @@
 target/
 .DS_Store
 /.idea/
-/jffi2844023782346797543.dylib
+/*.dylib
